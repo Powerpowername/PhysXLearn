@@ -64,4 +64,14 @@ inline physx::PxMat44 toPxMat44(const glm::mat4& m)
         physx::PxVec4(m[2][0], m[2][1], m[2][2], m[2][3]),
         physx::PxVec4(m[3][0], m[3][1], m[3][2], m[3][3]));
 }
+
+template <typename T>
+inline void PxDeleter(T* t)
+{
+    if (t)
+    {
+        t->release();
+        t = nullptr;
+    }
+}
 } // namespace auxi
