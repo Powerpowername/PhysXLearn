@@ -4,6 +4,7 @@ project(Trigger)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/bin)
 add_executable(TriggerPro)
+target_compile_features(TriggerPro PRIVATE cxx_std_17)
 # 为GLM定义拓展宏，否则不能使用
 target_compile_definitions(TriggerPro PRIVATE GLM_ENABLE_EXPERIMENTAL)
 
