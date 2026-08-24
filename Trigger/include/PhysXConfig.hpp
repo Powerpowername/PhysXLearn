@@ -19,7 +19,12 @@ namespace Learner
 // struct Cube
 // {
 
-
+enum class SimulationType
+{
+    CONCAT,
+    TRIGGER,
+    CALLBACK
+};
 
 // };
 class PhysXConfig
@@ -38,7 +43,11 @@ private:
 
 public:
     static void init();
-    static optional<bool> createSphereShape(PxReal radius,bool isExclusive);
+    static optional<bool> createSphereShape(PxReal radius,bool isExclusive,SimulationType simulationType);
+    static PxFilterFlags filterShader(PxFilterObjectAttributes attributes0, PxFilterData filterData0, 
+												PxFilterObjectAttributes attributes1, PxFilterData filterData1,
+												PxPairFlags& pairFlags, const void* constantBlock, PxU32 constantBlockSize);
+
 };
 
 

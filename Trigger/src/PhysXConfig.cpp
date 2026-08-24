@@ -30,20 +30,62 @@ void PhysXConfig::init()
 }
 // 
 
-optional<bool> PhysXConfig::createSphereShape(PxReal radius,bool isExclusive)
+optional<bool> PhysXConfig::createSphereShape(PxReal radius,bool isExclusive,SimulationType simulationType)
 {
     
-    auto& geometry = PxSphereGeometry(4.0f);
+    auto& geometry = PxSphereGeometry(radius);
 
     PxShape* shape = nullptr;
+    
+    switch(simulationType)
+    {
+    case SimulationType::CONCAT: 
+        const PxShapeFlags shapeFlags = PxShapeFlag::eVISUALIZATION | PxShapeFlag::eSIMULATION_SHAPE;
+		shape = gPhysics->createShape(geometry, *gMaterial, isExclusive, shapeFlags);
+    break;
 
 
-    // failed
-    return nullopt;
+    case SimulationType::TRIGGER: 
+        const PxShapeFlags shapeFlags = PxShapeFlag::eVISUALIZATION | PxShapeFlag::eTRIGGER_SHAPE;
+        shape = gPhysics->createShape(geometry,*gMaterial,isExclusive,shapeFlags);
+    break;
+    
+    
+    case SimulationType::CALLBACK: break;
+		shape = gPhysics->createShape(geometry, *gMaterial, isExclusive);
+    default: return false;
+
+    }
 
     return true;
 }
 
+PxFilterFlags filterShader(PxFilterObjectAttributes attributes0, PxFilterData filterData0, 
+												PxFilterObjectAttributes attributes1, PxFilterData filterData1,
+												PxPairFlags& pairFlags, const void* constantBlock, PxU32 constantBlockSize)
+{
+    
+    {
+        // 开启碰撞检测和ccd检测
+        pairFlags = PxPairFlag::eCONTACT_DEFAULT | PxPairFlag::eDETECT_CCD_CONTACT;
 
 
+    }
+
+ 
+	return PxFilterFlag::eDEFAULT;
+
+}
+
+static PxFilterFlags triggersUsingFilterCallback(PxFilterObjectAttributes /*attributes0*/, PxFilterData /*filterData0*/, 
+												PxFilterObjectAttributes /*attributes1*/, PxFilterData /*filterData1*/,
+												PxPairFlags& pairFlags, const void* /*constantBlock*/, PxU32 /*constantBlockSize*/)
+{
+
+	pairFlags = PxPairFlag::eCONTACT_DEFAULT;
+
+
+	return PxFilterFlag::eCALLBACK;
+
+}
 }
