@@ -60,7 +60,7 @@ optional<bool> PhysXConfig::createSphereShape(PxReal radius,bool isExclusive,Sim
     return true;
 }
 
-PxFilterFlags filterShader(PxFilterObjectAttributes attributes0, PxFilterData filterData0, 
+PxFilterFlags PhysXConfig::filterShader(PxFilterObjectAttributes attributes0, PxFilterData filterData0, 
 												PxFilterObjectAttributes attributes1, PxFilterData filterData1,
 												PxPairFlags& pairFlags, const void* constantBlock, PxU32 constantBlockSize)
 {

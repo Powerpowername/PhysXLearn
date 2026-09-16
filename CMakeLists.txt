@@ -6,3 +6,4 @@ project(LearnPhysX)
 
 
 add_subdirectory(Trigger)
+add_subdirectory(Joint)
