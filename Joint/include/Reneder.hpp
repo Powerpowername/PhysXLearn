@@ -224,19 +224,12 @@ inline MeshData createSphere(int segments = 32, int rings = 16)
     return mesh;
 }
 
-
-
-
-class RenderOperatorFactory
-{
-
-};
-
 class RenderOperator
 {
 public:
-    explicit RenderOperator(const MeshData& data);        // 构造即上传 VBO/EBO，建 VAO
-    ~RenderOperator();                                    // glDeleteVertexArrays/Buffers
+    RenderOperator() = default;        // 空对象，不建任何 GL 资源
+    explicit RenderOperator(const MeshData& data);   // 上传 VBO/EBO、建 VAO、配置实例属性
+    virtual ~RenderOperator();                                    // glDeleteVertexArrays/Buffers
 
     RenderOperator(const RenderOperator&)            = delete;      // 关键：拷贝会导致 VAO 被删两次
     RenderOperator& operator=(const RenderOperator&) = delete;
@@ -244,16 +237,17 @@ public:
     RenderOperator& operator=(RenderOperator&& other) noexcept;
 
     // 每帧更新实例数据；容量不足时按 2 倍扩容
-    void setInstances(std::span<const glm::mat4> transforms);
-    void drawInstanced() const;                 // 绑定 VAO + glDrawElementsInstanced
+    virtual void setInstances(std::span<const glm::mat4> transforms);
+    virtual void drawInstanced() const;                 // 绑定 VAO + glDrawElementsInstanced
 
-    std::size_t vertexCount()  const;
-    std::size_t indexCount()   const;
-    std::size_t instanceCount() const;
+    virtual std::size_t vertexCount()  const{ return vertexCount_; };
+    virtual std::size_t indexCount()   const{ return indexCount_; };
+    virtual std::size_t instanceCount() const{ return instanceCount_; };
 
 
-
-private:
+// 派生类（CubeRenderOperator 等）的构造函数要在这里填充 VAO/VBO/EBO/实例缓冲，
+// 所以资源句柄必须是 protected 而不能是 private
+protected:
     unsigned int vao_ = 0;
     unsigned int vbo_ = 0;
     unsigned int ebo_ = 0;
@@ -263,4 +257,40 @@ private:
     std::size_t  instanceCount_ = 0;
     std::size_t  instanceCapacity_ = 0;
 };
+
+// 三种几何体唯一的区别就是「默认用哪一份 MeshData」：
+// 上传 VBO/EBO、建 VAO、配置实例属性、逐帧绘制，全部由基类 RenderOperator 完成，
+// 所以派生类只需要一行转发给基类构造函数的构造函数。
+class CubeRenderOperator : public RenderOperator
+{
+public:
+    explicit CubeRenderOperator(const MeshData& data = createCube());
+};
+
+class SphereRenderOperator : public RenderOperator
+{
+public:
+    explicit SphereRenderOperator(const MeshData& data = createSphere());
+};
+
+class PlaneRenderOperator : public RenderOperator
+{
+public:
+    explicit PlaneRenderOperator(const MeshData& data = createPlane());
+};
+
+
+class RenderOperatorFactory
+{
+private:
+    // 引用成员一旦绑定就不能重新指向，而 FactoryInit 的语义是「事后再指定目标」，
+    // 所以这里必须存指针。默认 nullptr，调用过 FactoryInit 之前不能使用。
+    RenderOperator* renderOperator = nullptr;
+public:
+    void FactoryInit(RenderOperator& renderOperator);
+    void setInstances(std::span<const glm::mat4> transforms);
+    void drawInstanced();                 // 绑定 VAO + glDrawElementsInstanced
+
+};
+
 }// namespace PhysXLearner

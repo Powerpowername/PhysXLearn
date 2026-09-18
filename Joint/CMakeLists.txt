@@ -32,6 +32,7 @@ target_include_directories(JointPro PRIVATE
 
 target_sources(JointPro PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/Reneder.cpp
     )
 
 target_link_libraries(JointPro PRIVATE
