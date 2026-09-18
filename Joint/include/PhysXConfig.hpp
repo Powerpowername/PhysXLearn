@@ -3,6 +3,7 @@
 #include <optional>
 #include <functional>
 #include <vector>
+#include "glm/glm.hpp"
 using namespace physx;
 using namespace std;
 namespace PhysXLearner
@@ -18,12 +19,16 @@ public:
 
     static void createChain(const PxTransform& t, PxU32 length, const PxGeometry& g, PxReal separation, JointCreateFunction createJoint);
 
+    // 渲染要取场景里每个 shape 的变换，所以把场景句柄暴露出来
+    static PxScene* getScene();
+    // 把一批 shape 的世界变换算成渲染器能直接用的模型矩阵，写进 transforms
+    static void getShapeTransforms(std::vector<glm::mat4>& transforms, std::vector<PxShape*> shapes);
 
 
 private:
 
     static optional<PxRigidDynamic*> createDynamic(const PxTransform& t, const PxGeometry& geometry, const PxVec3& velocity=PxVec3(0));
-    static optional<PxJoint*> createLimitedSphericalJoint(PxRigidActor* actor0, PxRigidActor* actor1, const PxTransform& localFrame0, const PxTransform& localFrame1);
+    static optional<PxJoint*> createLimitedSphericalJoint(PxRigidActor* actor0, const PxTransform& localFrame0, PxRigidActor* actor1, const PxTransform& localFrame1);
 
 
 
