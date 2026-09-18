@@ -7,8 +7,6 @@
 #include <fstream>
 #include <sstream>
 #include <iostream>
-#include <algorithm>
-#include <iomanip>
 
 class Shader
 {
@@ -18,8 +16,6 @@ public:
     // ------------------------------------------------------------------------
     Shader(const char* vertexPath, const char* fragmentPath)
     {
-        std::cout << "Shader vertexPath=" << vertexPath << std::endl;
-        std::cout << "Shader fragmentPath=" << fragmentPath << std::endl;
         // 1. retrieve the vertex/fragment source code from filePath
         std::string vertexCode;
         std::string fragmentCode;
@@ -48,37 +44,6 @@ public:
         {
             std::cout << "ERROR::SHADER::FILE_NOT_SUCCESSFULLY_READ: " << e.what() << std::endl;
         }
-        auto dumpShaderBytes = [](const char* label, const std::string& source)
-        {
-            std::cout << label << " size=" << source.size() << " first bytes:";
-            const auto count = std::min<std::size_t>(source.size(), 32);
-            for (std::size_t i = 0; i < count; ++i)
-            {
-                std::cout << ' ' << std::hex << std::setw(2) << std::setfill('0')
-                          << static_cast<int>(static_cast<unsigned char>(source[i]));
-            }
-            std::cout << std::dec << std::setfill(' ') << std::endl;
-        };
-        auto dumpDriverShaderSource = [&dumpShaderBytes](GLuint shader, const char* label)
-        {
-            GLint sourceLength = 0;
-            glGetShaderiv(shader, GL_SHADER_SOURCE_LENGTH, &sourceLength);
-            if (sourceLength <= 0)
-            {
-                std::cout << label << " driver source length=" << sourceLength << std::endl;
-                return;
-            }
-
-            std::string source(static_cast<std::size_t>(sourceLength), '\0');
-            GLsizei written = 0;
-            glGetShaderSource(shader, sourceLength, &written, source.data());
-            source.resize(static_cast<std::size_t>(written));
-            dumpShaderBytes(label, source);
-        };
-
-        dumpShaderBytes("vertex file", vertexCode);
-        dumpShaderBytes("fragment file", fragmentCode);
-        std::cout << "glad_glShaderSource=" << reinterpret_cast<const void*>(glad_glShaderSource) << std::endl;
         const char* vShaderCode = vertexCode.c_str();
         const char * fShaderCode = fragmentCode.c_str();
         // 2. compile shaders
@@ -86,13 +51,11 @@ public:
         // vertex shader
         vertex = glCreateShader(GL_VERTEX_SHADER);
         glShaderSource(vertex, 1, &vShaderCode, NULL);
-        dumpDriverShaderSource(vertex, "vertex driver");
         glCompileShader(vertex);
         checkCompileErrors(vertex, "VERTEX");
         // fragment Shader
         fragment = glCreateShader(GL_FRAGMENT_SHADER);
         glShaderSource(fragment, 1, &fShaderCode, NULL);
-        dumpDriverShaderSource(fragment, "fragment driver");
         glCompileShader(fragment);
         checkCompileErrors(fragment, "FRAGMENT");
         // shader Program
